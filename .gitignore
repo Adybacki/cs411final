@@ -1,1 +1,7 @@
 .env
+
+weather_venv
+
+*.pyc
+
+.DS_Store

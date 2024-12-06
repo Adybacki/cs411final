@@ -184,7 +184,7 @@ def login() -> Response:
     
 
 @app.route('/api/get-favorite', methods=['GET'])
-def get_favorite():
+def get_favorite() -> Response:
     """
     Route to get the favorite location from the database.
 
@@ -192,13 +192,19 @@ def get_favorite():
         JSON response with the favorite location.
     """
     try:
-        location = user_model.get_favorite()
+        data = request.get_json()
+        user_id = data.get('user_id')
+
+        if not user_id:
+            return make_response(jsonify({'error': 'Invalid input, user_id is required'}), 400)
+        
+        location = user_model.get_favorite(user_id)
         return make_response(jsonify(location), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 500)
 
 @app.route('/api/set-favorite', methods=['POST'])
-def set_favorite():
+def set_favorite() -> Response:
     """
     Route to set the favorite location in the database.
 
@@ -219,7 +225,6 @@ def set_favorite():
         return make_response(jsonify({'status': 'favorite set', 'location': location_name}), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 500)
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

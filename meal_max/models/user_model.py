@@ -17,6 +17,9 @@ class User:
     username: str
     salt: str
     password: str
+    location_name: str
+    latitude: float
+    longitude: float
 
     @staticmethod
     def generate_salted_hash(password: str) -> tuple[str, str]:
@@ -72,7 +75,7 @@ def create_account(username: str, password: str) -> None:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO users (username, salt, password)
+                INSERT INTO users (username, salt, pword)
                 VALUES (?, ?, ?)
                 """,
                 (username, salt, hashed_password),
@@ -112,7 +115,7 @@ def update_password(username: str, password: str) -> None:
             cursor.execute(
                 """
                 UPDATE users
-                SET salt = ?, password = ?
+                SET salt = ?, pword = ?
                 WHERE username = ?
                 """,
                 (salt, hashed_password, username),
@@ -146,7 +149,7 @@ def login(username: str, password: str) -> bool:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                SELECT salt, password
+                SELECT salt, pword
                 FROM users
                 WHERE username = ?
                 """,

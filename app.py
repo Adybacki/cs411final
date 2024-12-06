@@ -176,6 +176,32 @@ def login() -> Response:
     except Exception as e:
         app.logger.error("Failed to login: %s", str(e))
         return make_response(jsonify({'error': str(e)}), 500)
+    
+
+@app.route('/api/add-favorite', methods=['POST'])
+def add_favorite():
+    """
+    
+    Route to add a favorite location to the database.
+
+    Expected JSON Input:
+        - location_name (str): Name of the location.
+        - latitude (float): Latitude of the location.
+        - longitude (float): Longitude of the location.
+    """
+    data = request.get_json()
+    location_name = data.get('location_name')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    if not location_name or not latitude or not longitude:
+        return make_response(jsonify({'error': 'Invalid input, all fields are required'}), 400)
+    # Call the model to add the favorite
+    try:
+        user_model.add_favorite(location_name, latitude, longitude)
+        return make_response(jsonify({'status': 'favorite added', 'location': location_name}), 201)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 500)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

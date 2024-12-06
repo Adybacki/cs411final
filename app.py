@@ -1,8 +1,13 @@
 from dotenv import load_dotenv
+import os
+import requests
+import datetime
+
 from flask import Flask, jsonify, make_response, Response, request
 # from flask_cors import CORS
 
 from meal_max.models import user_model
+from meal_max.models import weather_model
 from meal_max.utils.sql_utils import check_database_connection, check_table_exists
 
 
@@ -214,6 +219,7 @@ def set_favorite():
         return make_response(jsonify({'status': 'favorite set', 'location': location_name}), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 500)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

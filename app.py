@@ -182,6 +182,11 @@ def login() -> Response:
         app.logger.error("Failed to login: %s", str(e))
         return make_response(jsonify({'error': str(e)}), 500)
     
+##########################################################
+#
+# Favorite Location Management
+#
+##########################################################
 
 @app.route('/api/get-favorite', methods=['GET'])
 def get_favorite() -> Response:
@@ -226,5 +231,137 @@ def set_favorite() -> Response:
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 500)
 
+##########################################################
+#
+# Weather Routes
+#
+##########################################################
+
+@app.route('/api/current-weather', methods=['GET'])
+def fetch_current_weather():
+    """
+    Fetches current weather data for the user's favorite location.
+
+    Returns:
+        JSON response with current weather information.
+    """
+    try:
+        location = user_model.get_favorite()
+        api_key = os.getenv("OPENWEATHER_API_KEY")
+        url = "https://api.openweathermap.org/data/2.5/weather"
+        params = {
+            "lat": location['latitude'],
+            "lon": location['longitude'],
+            "units": "metric",
+            "appid": api_key
+        }
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        current_weather = response.json()
+
+        return make_response(jsonify({
+            "location": location['location_name'],
+            "current_weather": current_weather
+        }), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 500)
+
+@app.route('/api/forecast', methods=['GET'])
+def fetch_forecast():
+    """
+    Fetches a 7-day weather forecast for the user's favorite location.
+
+    Returns:
+        JSON response with the weather forecast.
+    """
+    try:
+        location = user_model.get_favorite()
+        api_key = os.getenv("OPENWEATHER_API_KEY")
+        url = "https://api.openweathermap.org/data/3.0/onecall"
+        params = {
+            "lat": location['latitude'],
+            "lon": location['longitude'],
+            "exclude": "current,minutely,hourly",
+            "units": "metric",
+            "appid": api_key
+        }
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        forecast = response.json().get("daily", [])
+
+        return make_response(jsonify({
+            "location": location['location_name'],
+            "forecast": forecast
+        }), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 500)
+
+@app.route('/api/historical-weather', methods=['GET'])
+def fetch_historical_weather():
+    """
+    Fetches historical weather data for the user's favorite location on a specific date.
+
+    Query Parameters:
+        - date (str): The date in YYYY-MM-DD format.
+
+    Returns:
+        JSON response with the historical weather data.
+    """
+    try:
+        query_date = request.args.get("date")
+        if not query_date:
+            return make_response(jsonify({"error": "Date parameter is required"}), 400)
+
+        location = user_model.get_favorite()
+        unix_timestamp = int(datetime.strptime(query_date, "%Y-%m-%d").timestamp())
+
+        api_key = os.getenv("OPENWEATHER_API_KEY")
+        url = "https://api.openweathermap.org/data/3.0/onecall/timemachine"
+        params = {
+            "lat": location['latitude'],
+            "lon": location['longitude'],
+            "dt": unix_timestamp,
+            "units": "metric",
+            "appid": api_key
+        }
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        historical_weather = response.json().get("current", {})
+
+        return make_response(jsonify({
+            "location": location['location_name'],
+            "date": query_date,
+            "historical_weather": historical_weather
+        }), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 500)
+
+@app.route('/api/air-quality', methods=['GET'])
+def fetch_air_quality():
+    """
+    Fetches air quality data for the user's favorite location.
+
+    Returns:
+        JSON response with air quality information.
+    """
+    try:
+        location = user_model.get_favorite()
+        api_key = os.getenv("OPENWEATHER_API_KEY")
+        url = "https://api.openweathermap.org/data/2.5/air_pollution"
+        params = {
+            "lat": location['latitude'],
+            "lon": location['longitude'],
+            "appid": api_key
+        }
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        air_quality = response.json()
+
+        return make_response(jsonify({
+            "location": location['location_name'],
+            "air_quality": air_quality
+        }), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 500)
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

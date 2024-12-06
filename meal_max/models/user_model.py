@@ -169,3 +169,72 @@ def login(username: str, password: str) -> bool:
     except sqlite3.Error as e:
         logger.error("Database error: %s", str(e))
         raise e
+
+    def set_favorite(city_name:str, lat:float, lon:float, user_id:int) -> None:
+        """
+        Sets a favorite city for a user.
+
+        Args:
+            city_name (str): The name of the city.
+            lat (float): The latitude of the city.
+            lon (float): The longitude of the city.
+            user_id (int): The ID of the user.
+
+        Raises:
+            sqlite3.Error: If there is an error with the database connection or query.
+        """
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                     UPDATE users
+                     SET latitude = ?, longitude = ?, location_name = ?
+                     WHERE id = ?
+                    """,
+                    (lat, lon, city_name, user_id),
+                )
+                conn.commit()
+                logger.info("Favorite city set for user %s: %s", user_id, city_name)
+
+        except sqlite3.Error as e:
+            logger.error("Database error: %s", str(e))
+            raise e
+    
+    def get_favorite(user_id:int) -> Any: 
+        """
+        Gets the favorite city for a user.
+
+        Args:
+            user_id (int): The ID of the user.
+
+        Returns:
+            Any: A tuple containing the city name, latitude, and longitude.
+
+        Raises:
+            sqlite3.Error: If there is an error with the database connection or query.
+        """
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    SELECT location_name, latitude, longitude
+                    FROM users
+                    WHERE id = ?
+                    """,
+                    (user_id,),
+                )
+                row = cursor.fetchone()
+
+                if row is None:
+                    logger.info("Favorite city not found for user %s", user_id)
+                    return None
+
+                city_name, lat, lon = row
+                logger.info("Favorite city retrieved for user %s: %s", user_id, city_name)
+                return city_name, lat, lon
+
+        except sqlite3.Error as e:
+            logger.error("Database error: %s", str(e))
+            raise e

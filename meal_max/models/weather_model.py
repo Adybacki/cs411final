@@ -123,3 +123,6 @@ def fetch_air_quality(user_id: int):
         "location": location[0],
         "air_quality": response.json()
     }
+
+
+

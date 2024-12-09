@@ -118,3 +118,58 @@ def test_login(mock_cursor):
     # Check that the arguments match the expected values
     expected_arguments = ("test_user",) # We know the username
     assert actual_arguments == expected_arguments, "The SQL arguments did not match the expected values."
+
+#Create account with duplicate usernames 
+def test_create_account_duplicate_user(mock_cursor):
+    # Simulate that a user with the same username already exists
+    mock_cursor.fetchone.return_value = ("test_user",)
+
+    # Expect that an IntegrityError (or custom exception) is raised
+    with pytest.raises(Exception) as excinfo:
+        create_account("test_user", "password123")
+    
+    # Assert the exception contains the relevant message
+    assert "already exists" in str(excinfo.value), "Expected an exception for duplicate username."
+
+#Updated password for non-existent users 
+def test_update_password_nonexistent_user(mock_cursor):
+    # Simulate no rows affected by the update
+    mock_cursor.rowcount = 0
+
+    with pytest.raises(Exception) as excinfo:
+        update_password("nonexistent_user", "new_password123")
+    
+    assert "User not found" in str(excinfo.value), "Expected an exception for non-existent user."
+
+#Login with invalid password 
+def test_login_invalid_password(mock_cursor):
+    # Mock a valid user entry in the database
+    mock_cursor.fetchone.return_value = ("test_user", "salt", "hashed_password")
+
+    # Call the function with an incorrect password
+    result = login("test_user", "wrong_password")
+
+    # Check that the function returns False
+    assert result == False, "Expected login to fail for invalid password."
+
+#Login for nonexitent users 
+def test_login_nonexistent_user(mock_cursor):
+    # Simulate no user found in the database
+    mock_cursor.fetchone.return_value = None
+
+    # Call the function
+    result = login("nonexistent_user", "password123")
+
+    # Check that the function returns False
+    assert result == False, "Expected login to fail for non-existent user."
+
+#Database errors are handled gracefully // When database is unavilable or queries fail 
+def test_create_account_database_error(mock_cursor):
+    # Simulate a database error
+    mock_cursor.execute.side_effect = sqlite3.DatabaseError("Database error")
+
+    with pytest.raises(Exception) as excinfo:
+        create_account("test_user", "password123")
+    
+    assert "Database error" in str(excinfo.value), "Expected a database error to be raised."
+

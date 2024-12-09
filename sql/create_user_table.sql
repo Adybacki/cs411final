@@ -6,6 +6,6 @@ CREATE TABLE users (
     salt TEXT NOT NULL,
     deleted BOOLEAN DEFAULT FALSE,
     location_name TEXT,
-    latitute REAL,
+    latitude REAL,
     longitude REAL
 );

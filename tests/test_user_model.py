@@ -3,8 +3,9 @@ import re
 import sqlite3
 
 import pytest
+from pytest_mock import mocker
 
-from meal_max.models.user_model import User, create_account, update_password, login
+from meal_max.models.user_model import (User, create_account, update_password, login)
 
 
 ######################################################
@@ -33,7 +34,7 @@ def mock_cursor(mocker):
     def mock_get_db_connection():
         yield mock_conn  # Yield the mocked connection object
 
-    mocker.patch("meal_max.models.kitchen_model.get_db_connection", mock_get_db_connection)
+    mocker.patch("meal_max.models.user_model.get_db_connection", mock_get_db_connection)
 
     return mock_cursor  # Return the mock cursor so we can set expectations per test
 
@@ -49,7 +50,7 @@ def test_create_account(mock_cursor):
 
     expected_query = normalize_whitespace(
         """
-        INSERT INTO users (username, salt, password)
+        INSERT INTO users (username, salt, pword)
         VALUES (?, ?, ?)
         """
     )
@@ -58,14 +59,13 @@ def test_create_account(mock_cursor):
     
     actual_query = normalize_whitespace(mock_cursor.execute.call_args[0][0])
     assert actual_query == expected_query, "The SQL query did not match the expected structure."
-   
-    # Extract the arguments used in the SQL call (second element of call_args)
-    actual_arguments = mock_cursor.execute.call_args[0][1]
 
-    # Check that the arguments match the expected values
-    expected_arguments = ("test_user", mocker.ANY, mocker.ANY) # We don't know the exact values for salt and password
-    assert actual_arguments == expected_arguments, "The SQL arguments did not match the expected values."
+    user = session.query(User).filter_by(username="test_user").first()
 
+    # Check that the user was added to the database
+    assert user is not None, "The user was not added to the database."
+
+    assert user.username == "test_user", "The username did not match the expected value."
 
 def test_update_password(mock_cursor):
     # Call the function
@@ -74,7 +74,7 @@ def test_update_password(mock_cursor):
     expected_query = normalize_whitespace(
         """
         UPDATE users
-        SET salt = ?, password = ?
+        SET salt = ?, pword = ?
         WHERE username = ?
         """
     )
@@ -103,7 +103,7 @@ def test_login(mock_cursor):
     # Check that the cursor executed the query with the correct arguments
     expected_query = normalize_whitespace(
         """
-        SELECT username, salt, password
+        SELECT username, salt, pword
         FROM users
         WHERE username = ?
         """

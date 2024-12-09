@@ -190,6 +190,15 @@ def login() -> Response:
 
 @app.route('/api/current-weather', methods=['GET'])
 def fetch_current_weather_route():
+    """
+    route to fetch current weather data for the user's favorite location.
+
+    Returns:
+        JSON response containing the current weather data.
+
+    Raises:
+        500 error if there is an issue fetching the weather data.
+    """
     user_id = request.args.get("user_id")
     try:
         current_weather_data = weather_model.fetch_current_weather(int(user_id))
@@ -199,6 +208,15 @@ def fetch_current_weather_route():
     
 @app.route('/api/forecast', methods=['GET'])
 def fetch_forecast_route():
+    """
+    route to fetch 7-day weather forecast for the user's favorite location.
+
+    Returns:
+        JSON response containing the weather forecast data.
+
+    Raises:
+        500 error if there is an issue fetching the forecast data.
+    """
     user_id = request.args.get("user_id")
     try:
         forecast_data = weather_model.fetch_forecast(int(user_id))
@@ -208,6 +226,16 @@ def fetch_forecast_route():
 
 @app.route('/api/historical-weather', methods=['GET'])
 def fetch_historical_weather_route():
+    """
+    route to fetch historical weather data for the user's favorite location.
+
+    Returns:
+        JSON response containing the historical weather data.
+
+    Raises:
+        400 error if the date parameter is missing.
+        500 error if there is an issue fetching the historical weather data.
+    """
     user_id = request.args.get("user_id")
     query_date = request.args.get("date")
     if not query_date:
@@ -220,6 +248,15 @@ def fetch_historical_weather_route():
 
 @app.route('/api/air-quality', methods=['GET'])
 def fetch_air_quality_route():
+    """
+    route to fetch air quality data for the user's favorite location.
+
+    Returns:
+        JSON response containing the air quality data.
+
+    Raises:
+        500 error if there is an issue fetching the air quality data.
+    """
     user_id = request.args.get("user_id")
     try:
         air_quality_data = weather_model.fetch_air_quality(int(user_id))
@@ -228,4 +265,4 @@ def fetch_air_quality_route():
         return make_response(jsonify({'error': str(e)}), 500)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5050)
+    app.run(debug=True, host='0.0.0.0', port=5000)

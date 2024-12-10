@@ -118,7 +118,7 @@ def fetch_historical_weather(username: str, query_date: str):
         "historical_weather": response.json().get("current", {})
     }
 
-def fetch_air_quality(username: int):
+def fetch_air_quality(username: str):
     """
     Fetches air quality data for the user's favorite location.
 

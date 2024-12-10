@@ -200,7 +200,7 @@ def create_app(config_class=TestConfig):
         Route to set a favorite location for a user.
 
         Expected JSON Input:
-            - user_id (int): The ID of the user.
+            - username (int): The username of the user.
             - city_name (str): The name of the city.
             - latitude (float): The latitude of the city.
             - longitude (float): The longitude of the city.
@@ -218,20 +218,20 @@ def create_app(config_class=TestConfig):
             data = request.get_json()
 
             # Extract and validate required fields
-            user_id = data.get('user_id')
+            username = data.get('username')
             city_name = data.get('city_name')
             latitude = data.get('latitude')
             longitude = data.get('longitude')
 
-            if not (user_id and city_name and latitude and longitude):
+            if not (username and city_name and latitude and longitude):
                 return make_response(jsonify({'error': 'Invalid input, all fields are required'}), 400)
 
             # Call the user_model function to set the favorite location
-            app.logger.info('Setting favorite location for user %s: %s', user_id, city_name)
-            user_model.set_favorite(city_name, float(latitude), float(longitude), int(user_id))
+            app.logger.info('Setting favorite location for user %s: %s', username, city_name)
+            user_model.set_favorite(str(username), city_name, float(latitude), float(longitude))
 
-            app.logger.info("Favorite location set for user %s: %s", user_id, city_name)
-            return make_response(jsonify({'status': 'favorite location set', 'user_id': user_id, 'city_name': city_name}), 200)
+            app.logger.info("Favorite location set for user %s: %s", username, city_name)
+            return make_response(jsonify({'status': 'favorite location set', 'username': username, 'city_name': city_name}), 200)
         except Exception as e:
             app.logger.error("Failed to set favorite location: %s", str(e))
             return make_response(jsonify({'error': str(e)}), 500)
@@ -248,9 +248,9 @@ def create_app(config_class=TestConfig):
         Raises:
             500 error if there is an issue fetching the weather data.
         """
-        user_id = request.args.get("user_id")
+        username = request.args.get("username")
         try:
-            current_weather_data = weather_model.fetch_current_weather(int(user_id))
+            current_weather_data = weather_model.fetch_current_weather(str(username))
             return make_response(jsonify(current_weather_data), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
@@ -266,9 +266,9 @@ def create_app(config_class=TestConfig):
         Raises:
             500 error if there is an issue fetching the forecast data.
         """
-        user_id = request.args.get("user_id")
+        username = request.args.get("username")
         try:
-            forecast_data = weather_model.fetch_forecast(int(user_id))
+            forecast_data = weather_model.fetch_forecast(str(username))
             return make_response(jsonify(forecast_data), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
@@ -285,12 +285,12 @@ def create_app(config_class=TestConfig):
             400 error if the date parameter is missing.
             500 error if there is an issue fetching the historical weather data.
         """
-        user_id = request.args.get("user_id")
+        username = request.args.get("username")
         query_date = request.args.get("date")
         if not query_date:
             return make_response(jsonify({"error": "Date parameter is required"}), 400)
         try:
-            historical_weather_data = weather_model.fetch_historical_weather(int(user_id), query_date)
+            historical_weather_data = weather_model.fetch_historical_weather(str(username), query_date)
             return make_response(jsonify(historical_weather_data), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
@@ -306,9 +306,9 @@ def create_app(config_class=TestConfig):
         Raises:
             500 error if there is an issue fetching the air quality data.
         """
-        user_id = request.args.get("user_id")
+        username = request.args.get("username")
         try:
-            air_quality_data = weather_model.fetch_air_quality(int(user_id))
+            air_quality_data = weather_model.fetch_air_quality(username)
             return make_response(jsonify(air_quality_data), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)

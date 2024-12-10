@@ -52,6 +52,44 @@ def fetch_current_weather(username: str):
         "current_weather": response.json()
     }
 
+def fetch_weather_overview(username: str):
+    """
+    Fetches weather overview data for the user's favorite location.
+
+    Args:
+        username (str): The username of the user.
+
+    Returns:
+        dict: Weather overview data.
+    """
+    # Error handling for location
+    location = User.get_favorite(username)
+    if not location or None in location or len(location) < 3:
+        raise ValueError("Invalid location data provided.")
+
+    # Error checking for the API key
+    api_key = os.getenv("OPENWEATHER_API_KEY")
+    if not api_key:
+        raise ValueError("API key is missing or invalid.")
+
+    url = "https://api.openweathermap.org/data/3.0/onecall/overview"
+    params = {
+        "lat": location[1],
+        "lon": location[2],
+        "appid": api_key,
+    }
+    
+    # Sending the GET request to the OpenWeather API
+    response = requests.get(url, params=params)
+    response.raise_for_status()  # This will raise an error if the API call fails
+    
+    # Return the response data along with the location
+    return {
+        "location": location[0],
+        "weather_overview": response.json()  # JSON response from OpenWeather API
+    }
+
+
 def fetch_forecast(username: str):
     """
     Fetches a 7-day weather forecast for the user's favorite location.

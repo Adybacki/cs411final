@@ -292,6 +292,24 @@ def create_app(config_class=TestConfig):
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 500)
         
+    @app.route('/api/weather-overview', methods=['GET'])
+    def fetch_weather_overview_route():
+        """
+        Route to fetch weather overview data for the user's favorite location.
+
+        Returns:
+            JSON response containing the weather overview data.
+
+        Raises:
+            500 error if there is an issue fetching the weather data.
+        """
+        username = request.args.get("username")
+        try:
+            weather_overview_data = weather_model.fetch_weather_overview(str(username))
+            return make_response(jsonify(weather_overview_data), 200)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 500)
+
     return app
 if __name__ == '__main__':
     app = create_app()

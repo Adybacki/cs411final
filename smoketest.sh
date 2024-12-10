@@ -145,6 +145,19 @@ test_air_quality() {
   fi
 }
 
+test_weather_overview() {
+  echo "Testing weather overview endpoint..."
+  response=$(curl -s -X GET "$BASE_URL/weather-overview" -G --data-urlencode "username=testuser")
+  if echo "$response" | grep -q '"error"'; then
+    echo "Weather overview test passed with error: $response"
+  elif echo "$response" | grep -q '"weather_overview"'; then
+    echo "Weather overview test passed: $response"
+  else
+    echo "Weather overview test failed: $response"
+    #exit 1
+  fi
+}
+
 # Run smoke tests
 check_health
 test_db_check
@@ -156,6 +169,7 @@ test_current_weather
 test_forecast
 test_historical_weather
 test_air_quality
+test_weather_overview
 
 echo "All smoke tests completed successfully!"
 

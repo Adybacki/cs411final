@@ -631,11 +631,11 @@ curl -X GET "http://localhost:5000/api/historical-weather?username=testuser&date
 **Request Format** (Query parameters):
 `username` (str): Username\
 **Response Format**:\
-`coord` Coordinates from the specified location (latitude, longitude)
-`list`
-`dt` Date and time, Unix, UTC
-`main`
-  main.aqi Air Quality Index. Possible values: 1, 2, 3, 4, 5. Where 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor. 
+`coord` Coordinates from the specified location (latitude, longitude)\
+`list`\
+  `dt` Date and time, Unix, UTC\
+  `main`\
+    `main.aqi` Air Quality Index. Possible values: 1, 2, 3, 4, 5. Where 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor. \
 
 **Request Example**:
 ```bash

@@ -140,5 +140,3 @@ def fetch_air_quality(user_id: int):
         "air_quality": response.json()
     }
 
-
-

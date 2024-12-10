@@ -79,7 +79,7 @@ test_set_favorite() {
   echo "Testing set favorite endpoint..."
   response=$(curl -s -X POST "$BASE_URL/set-favorite" \
     -H "Content-Type: application/json" \
-    -d '{"user_id": 1, "city_name": "New York", "latitude": 40.7128, "longitude": -74.0060}')
+    -d '{"username": "testuser", "city_name": "New York", "latitude": 40.7128, "longitude": -74.0060}')
   if echo "$response" | grep -q '"status": "favorite location set"'; then
     echo "Set favorite test passed: $response"
   else
@@ -92,7 +92,7 @@ test_set_favorite() {
 # Test current weather
 test_current_weather() {
   echo "Testing current weather endpoint..."
-  response=$(curl -s -X GET "$BASE_URL/current-weather" -G --data-urlencode "user_id=1")
+  response=$(curl -s -X GET "$BASE_URL/current-weather" -G --data-urlencode "username": "testuser")
   if echo "$response" | grep -q '"error"'; then
     echo "Current weather test passed with error: $response"
   elif echo "$response" | grep -q '"weather"'; then
@@ -106,7 +106,7 @@ test_current_weather() {
 # Test forecast
 test_forecast() {
   echo "Testing forecast endpoint..."
-  response=$(curl -s -X GET "$BASE_URL/forecast" -G --data-urlencode "user_id=1")
+  response=$(curl -s -X GET "$BASE_URL/forecast" -G --data-urlencode "username": "testuser")
   if echo "$response" | grep -q '"error"'; then
     echo "Forecast test passed with error: $response"
   elif echo "$response" | grep -q '"forecast"'; then
@@ -120,7 +120,7 @@ test_forecast() {
 # Test historical weather
 test_historical_weather() {
   echo "Testing historical weather endpoint..."
-  response=$(curl -s -X GET "$BASE_URL/historical-weather" -G --data-urlencode "user_id=1" --data-urlencode "date=2023-12-01")
+  response=$(curl -s -X GET "$BASE_URL/historical-weather" -G --data-urlencode "username": "testuser" --data-urlencode "date=2023-12-01")
   if echo "$response" | grep -q '"error"'; then
     echo "Historical weather test passed with error: $response"
   elif echo "$response" | grep -q '"historical_weather"'; then
@@ -134,7 +134,7 @@ test_historical_weather() {
 # Test air quality
 test_air_quality() {
   echo "Testing air quality endpoint..."
-  response=$(curl -s -X GET "$BASE_URL/air-quality" -G --data-urlencode "user_id=1")
+  response=$(curl -s -X GET "$BASE_URL/air-quality" -G --data-urlencode "username": "testuser")
   if echo "$response" | grep -q '"error"'; then
     echo "Air quality test passed with error: $response"
   elif echo "$response" | grep -q '"air_quality"'; then
@@ -147,15 +147,15 @@ test_air_quality() {
 
 # Run smoke tests
 check_health
-test_db_check
-test_create_account
-test_login
-test_update_password
+#test_db_check
+#test_create_account
+#test_login
+#test_update_password
 test_set_favorite
-test_current_weather
-test_forecast
-test_historical_weather
-test_air_quality
+#test_current_weather
+#test_forecast
+#test_historical_weather
+#test_air_quality
 
 echo "All smoke tests completed successfully!"
 

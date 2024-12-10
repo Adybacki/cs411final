@@ -1,7 +1,3 @@
-#!bin/bash
-
-BASE_URL = "http://localhost:5000/api"
-
 #!/bin/bash
 
 BASE_URL="http://localhost:5000/api"
@@ -174,6 +170,5 @@ test_historical_weather
 test_air_quality
 
 echo "All smoke tests completed successfully!"
-
 
 echo "Smoke tests completed successfully!"

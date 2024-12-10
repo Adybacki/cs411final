@@ -33,7 +33,7 @@ def fetch_current_weather(username: str):
         raise ValueError("Invalid location data provided.")
 
 
-    #Error checking for the API handling (What i)
+    #Error checking for the API handling 
     api_key = os.getenv("OPENWEATHER_API_KEY")
     if not api_key:
         raise ValueError("API key is missing or invalid.")
@@ -68,7 +68,7 @@ def fetch_forecast(username: str):
     if not api_key:
         raise ValueError("API key is missing or invalid.")
     
-    url = "https://api.openweathermap.org/data/3.0/onecall"
+    url = "https://api.openweathermap.org/data/2.5/forecast"
     params = {
         "lat": location[1],
         "lon": location[2],

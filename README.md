@@ -565,12 +565,12 @@ curl -X GET "http://localhost:5000/api/current-weather?username=testuser"
     }
   ],
   "location": "New York"
-}
+
 }
 ```
 **Example**:
 ```bash
-curl -X GET "http://localhost:5000/api/forecast?user_id=1"
+curl -X GET "http://localhost:5000/api/forecast?username=testuser"
 ```
 
 #### **Historical Weather**  
@@ -583,16 +583,45 @@ curl -X GET "http://localhost:5000/api/forecast?user_id=1"
 **Response Format**:
 ```json
 {
+   "date": "2023-12-01",
   "historical_weather": {
-    "date": "2023-12-01",
-    "temperature": 65,
-    "condition": "Clear"
-  }
+    "data": [
+      {
+        "clouds": 0,
+        "dew_point": 0,
+        "dt": 1701406800,
+        "feels_like": 4.38,
+        "humidity": 60,
+        "pressure": 1021,
+        "sunrise": 1701432038,
+        "sunset": 1701466183,
+        "temp": 7.24,
+        "visibility": 10000,
+        "weather": [
+          {
+            "description": "clear sky",
+            "icon": "01n",
+            "id": 800,
+            "main": "Clear"
+          }
+        ],
+        "wind_deg": 154,
+        "wind_gust": 7.6,
+        "wind_speed": 4.47
+      }
+    ],
+    "lat": 40.7128,
+    "lon": -74.006,
+    "timezone": "America/New_York",
+    "timezone_offset": -18000
+  },
+  "location": "New York"
+
 }
 ```
 **Example**:
 ```bash
-curl -X GET "http://localhost:5000/api/historical-weather?user_id=1&date=2023-12-01"
+curl -X GET "http://localhost:5000/api/historical-weather?username=testuser&date=2023-12-01"
 ```
 
 #### **Air Quality**  
@@ -634,4 +663,29 @@ curl -X GET "http://localhost:5000/api/historical-weather?user_id=1&date=2023-12
 **Example**:
 ```bash
 curl -X GET "http://localhost:5000/api/air-quality?username=testuser"
+```
+
+#### **Weather Overview**  
+**Path**: `/api/weather-overview`  
+**Request Type**: `GET`  
+**Purpose**: Fetches weather overview for the user's favorite location.  
+**Request Format** (Query parameters):
+- `username` (str): Username
+**Response Format**:
+```json
+{
+  "location": "New York",
+  "weather_overview": {
+    "date": "2024-12-10",
+    "lat": 40.7128,
+    "lon": -74.006,
+    "tz": "-05:00",
+    "units": "standard",
+    "weather_overview": "Currently, the temperature is 282K with a real feel of 279K. The air pressure is at 1016 hPa, and the humidity is quite high at 93%. The dew point is at 281K, and the visibility is at 9656 meters. The wind speed is at 4 m/s coming from the northeast at 50 degrees. The sky is mostly cloudy with mist in the air. It is advised to be cautious while driving or going outside due to reduced visibility caused by the mist. Make sure to dress warmly and be prepared for damp conditions. Overall, it's a chilly and misty day with fairly calm winds. Stay safe and enjoy your day!"
+  }
+}
+```
+**Example**:
+```bash
+curl -X GET "http://localhost:5000/api/weather-overview?username=testuser"
 ```

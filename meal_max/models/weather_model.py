@@ -16,7 +16,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
-def fetch_current_weather(user_id: int):
+def fetch_current_weather(username: str):
     """
     Fetches current weather data for the user's favorite location.
 
@@ -28,7 +28,7 @@ def fetch_current_weather(user_id: int):
     """
 
     #Error handling for location (What if location returned an empty array etc?)
-    location = User.get_favorite(user_id)
+    location = User.get_favorite(username)
     if not location or None in location or len(location) < 3:
         raise ValueError("Invalid location data provided.")
 
@@ -52,7 +52,7 @@ def fetch_current_weather(user_id: int):
         "current_weather": response.json()
     }
 
-def fetch_forecast(user_id: int):
+def fetch_forecast(username: str):
     """
     Fetches a 7-day weather forecast for the user's favorite location.
 
@@ -62,7 +62,7 @@ def fetch_forecast(user_id: int):
     Returns:
         dict: Weather forecast data.
     """
-    location = User.get_favorite(user_id)
+    location = User.get_favorite(username)
 
     api_key = os.getenv("OPENWEATHER_API_KEY")
     
@@ -81,7 +81,7 @@ def fetch_forecast(user_id: int):
         "forecast": response.json().get("daily", [])
     }
 
-def fetch_historical_weather(user_id: int, query_date: str):
+def fetch_historical_weather(username: str, query_date: str):
     """
     Fetches historical weather data for the user's favorite location.
 
@@ -92,7 +92,7 @@ def fetch_historical_weather(user_id: int, query_date: str):
     Returns:
         dict: Historical weather data.
     """
-    location = User.get_favorite(user_id)
+    location = User.get_favorite(username)
     
     unix_timestamp = int(datetime.strptime(query_date, "%Y-%m-%d").timestamp())
     api_key = os.getenv("OPENWEATHER_API_KEY")
@@ -113,7 +113,7 @@ def fetch_historical_weather(user_id: int, query_date: str):
         "historical_weather": response.json().get("current", {})
     }
 
-def fetch_air_quality(user_id: int):
+def fetch_air_quality(username: int):
     """
     Fetches air quality data for the user's favorite location.
 
@@ -123,7 +123,7 @@ def fetch_air_quality(user_id: int):
     Returns:
         dict: Air quality data.
     """
-    location = User.get_favorite(user_id)
+    location = User.get_favorite(username)
     api_key = os.getenv("OPENWEATHER_API_KEY")
     
     url = "https://api.openweathermap.org/data/2.5/air_pollution"

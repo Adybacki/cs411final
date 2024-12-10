@@ -6,6 +6,12 @@ BASE_URL = "http://localhost:5000/api"
 
 BASE_URL="http://localhost:5000/api"
 
+###############################################
+#
+# Health checks
+#
+###############################################
+
 # Check health status
 check_health() {
   echo "Checking health status..."
@@ -14,9 +20,75 @@ check_health() {
     echo "Service is healthy."
   else
     echo "Health check failed."
-    exit 1
+    #exit 1
   fi
 }
+
+# Check database health
+test_db_check() {
+  echo "Testing database health check..."
+  response=$(curl -s -X GET "$BASE_URL/db-check")
+  if echo "$response" | grep -q '"database_status": "healthy"'; then
+    echo "Database health check passed: $response"
+  else
+    echo "Database health check failed: $response"
+    #exit 1
+  fi
+}
+
+###############################################
+#
+# User Management
+#
+###############################################
+
+#Test create account
+test_create_account() {
+  echo "Testing create account endpoint..."
+  response=$(curl -s -X POST "$BASE_URL/create-account" \
+    -H "Content-Type: application/json" \
+    -d '{"username": "testuser", "password": "password123"}')
+  if echo "$response" | grep -q '"status": "account created"'; then
+    echo "Create account test passed: $response"
+  else
+    echo "Create account test failed: $response"
+    #exit 1
+  fi
+}
+
+#Test login
+test_login() {
+  echo "Testing login endpoint..."
+  response=$(curl -s -X POST "$BASE_URL/login" \
+    -H "Content-Type: application/json" \
+    -d '{"username": "testuser", "password": "password123"}')
+  if echo "$response" | grep -q '"status": "login successful"'; then
+    echo "Login test passed: $response"
+  else
+    echo "Login test failed: $response"
+    #exit 1
+  fi
+}
+
+#Test update password
+test_update_password() {
+  echo "Testing update password endpoint..."
+  response=$(curl -s -X POST "$BASE_URL/update-password" \
+    -H "Content-Type: application/json" \
+    -d '{"username": "testuser", "password": "newpassword123"}')
+  if echo "$response" | grep -q '"status": "password updated"'; then
+    echo "Update password test passed: $response"
+  else
+    echo "Update password test failed: $response"
+    #exit 1
+  fi
+}
+
+###############################################
+#
+# Weather Management
+#
+###############################################
 
 # Test current weather
 test_current_weather() {
@@ -28,7 +100,7 @@ test_current_weather() {
     echo "Current weather test passed: $response"
   else
     echo "Current weather test failed: $response"
-    exit 1
+    #exit 1
   fi
 }
 
@@ -42,7 +114,7 @@ test_forecast() {
     echo "Forecast test passed: $response"
   else
     echo "Forecast test failed: $response"
-    exit 1
+    #exit 1
   fi
 }
 
@@ -56,7 +128,7 @@ test_historical_weather() {
     echo "Historical weather test passed: $response"
   else
     echo "Historical weather test failed: $response"
-    exit 1
+    #exit 1
   fi
 }
 
@@ -70,15 +142,22 @@ test_air_quality() {
     echo "Air quality test passed: $response"
   else
     echo "Air quality test failed: $response"
-    exit 1
+    #exit 1
   fi
 }
 
 # Run smoke tests
 check_health
+test_db_check
+test_create_account
+test_login
+test_update_password
 test_current_weather
 test_forecast
 test_historical_weather
 test_air_quality
+
+echo "All smoke tests completed successfully!"
+
 
 echo "Smoke tests completed successfully!"

@@ -173,10 +173,6 @@ def test_fetch_weather_overview_empty_response(mocker):
     assert result["weather_overview"] == {}
 
 
-
-
-
-
 #------------------------------------ Working on edge cases ---------------------------------------------------------
 def test_fetch_current_weather_missing_api_key(mocker):
     username =  "test_user"

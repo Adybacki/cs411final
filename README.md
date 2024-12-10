@@ -632,10 +632,19 @@ curl -X GET "http://localhost:5000/api/historical-weather?username=testuser&date
 `username` (str): Username\
 **Response Format**:\
 `coord` Coordinates from the specified location (latitude, longitude)\
-`list`\
-- `dt` Date and time, Unix, UTC\
-- `main`\
-- - `main.aqi` Air Quality Index. Possible values: 1, 2, 3, 4, 5. Where 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor. \
+`list`
+- `components`
+- - components.co Сoncentration of CO (Carbon monoxide), μg/m3
+- - components.no Сoncentration of NO (Nitrogen monoxide), μg/m3
+- - components.no2 Сoncentration of NO2 (Nitrogen dioxide), μg/m3
+- - components.o3 Сoncentration of O3 (Ozone), μg/m3
+- - components.so2 Сoncentration of SO2 (Sulphur dioxide), μg/m3
+- - components.pm2_5 Сoncentration of PM2.5 (Fine particles matter), μg/m3
+- - components.pm10 Сoncentration of PM10 (Coarse particulate matter), μg/m3
+- - components.nh3 Сoncentration of NH3 (Ammonia), μg/m3
+- `dt` Date and time, Unix, UTC
+- `main`
+- - `main.aqi` Air Quality Index. Possible values: 1, 2, 3, 4, 5. Where 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor. 
 
 **Request Example**:
 ```bash
@@ -704,5 +713,5 @@ curl -X GET "http://localhost:5000/api/weather-overview?username=testuser"
     "weather_overview": "Currently, the temperature is 282K with a real feel of 279K. The air pressure is at 1016 hPa, and the humidity is quite high at 93%. The dew point is at 281K, and the visibility is at 9656 meters. The wind speed is at 4 m/s coming from the northeast at 50 degrees. The sky is mostly cloudy with mist in the air. It is advised to be cautious while driving or going outside due to reduced visibility caused by the mist. Make sure to dress warmly and be prepared for damp conditions. Overall, it's a chilly and misty day with fairly calm winds. Stay safe and enjoy your day!"
   }
 }
-```
 
+```

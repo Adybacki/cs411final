@@ -90,6 +90,21 @@ test_update_password() {
 #
 ###############################################
 
+#Test set favorite
+test_set_favorite() {
+  echo "Testing set favorite endpoint..."
+  response=$(curl -s -X POST "$BASE_URL/set-favorite" \
+    -H "Content-Type: application/json" \
+    -d '{"user_id": 1, "city_name": "New York", "latitude": 40.7128, "longitude": -74.0060}')
+  if echo "$response" | grep -q '"status": "favorite location set"'; then
+    echo "Set favorite test passed: $response"
+  else
+    echo "Set favorite test failed: $response"
+    #exit 1
+  fi
+}
+
+
 # Test current weather
 test_current_weather() {
   echo "Testing current weather endpoint..."
@@ -152,6 +167,7 @@ test_db_check
 test_create_account
 test_login
 test_update_password
+test_set_favorite
 test_current_weather
 test_forecast
 test_historical_weather

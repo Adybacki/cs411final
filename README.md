@@ -670,14 +670,14 @@ curl -X GET "http://localhost:5000/api/air-quality?username=testuser"
 **Request Type**: `GET`  
 **Purpose**: Fetches weather overview for the user's favorite location.  
 **Request Format** (Query parameters):
-- `username` (str): Username
+- `username` (str): Username<br>
 **Response Format**:
-`lat` Latitude of the location, decimal (−90; 90)
-`lon` Longitude of the location, decimal (-180; 180)
-`tz`  Timezone in the ±XX:XX format
-`date`  Date for which summary is generated in the format YYYY-MM-DD
-`units`  Units of measurement specified in the request
-`weather_overview`  AI generated weather overview for the requested date
+`lat` Latitude of the location, decimal (−90; 90)<br>
+`lon` Longitude of the location, decimal (-180; 180)<br>
+`tz`  Timezone in the ±XX:XX format<br>
+`date`  Date for which summary is generated in the format YYYY-MM-DD<br>
+`units`  Units of measurement specified in the request<br>
+`weather_overview`  AI generated weather overview for the requested date<br>
 
 **Request Example**:
 ```bash

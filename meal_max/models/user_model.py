@@ -38,20 +38,26 @@ class User(db.Model):
         return salt, hashed_password
 
     @classmethod
-    def verify_password(cls, stored_password: str, salt: str, password: str) -> bool:
+    def check_password(cls, username: str, password: str) -> bool:
         """
-        Verifies a given password against the stored hash and salt.
+        Check if a given password matches the stored password for a user.
 
         Args:
-            stored_password (str): The hashed password stored in the database.
-            salt (str): The salt stored in the database.
-            password (str): The password to verify.
+            username (str): The username of the user.
+            password (str): The password to check.
 
         Returns:
             bool: True if the password is correct, False otherwise.
+
+        Raises:
+            ValueError: If the user does not exist.
         """
-        hashed_password = hashlib.sha256((password + salt).encode()).hexdigest()
-        return hashed_password == stored_password
+        user = cls.query.filter_by(username=username).first()
+        if not user:
+            logger.info("User %s not found", username)
+            raise ValueError(f"User {username} not found")
+        hashed_password = hashlib.sha256((password + user.salt).encode()).hexdigest()
+        return hashed_password == user.password
     
     @classmethod
     def create_account(cls, username: str, password: str) -> None:
@@ -133,44 +139,48 @@ class User(db.Model):
         return hashed_password == user.password
 
     @classmethod
-    def set_favorite(cls, city_name:str, lat:float, lon:float, user_id:int) -> None:
+    def set_favorite(cls, username: str, city_name:str, lat:float, lon:float) -> None:
         """
         Sets a favorite city for a user.
 
         Args:
+            username (str): The username of the user.
             city_name (str): The name of the city.
             lat (float): The latitude of the city.
             lon (float): The longitude of the city.
-            user_id (int): The ID of the user.
 
         Raises:
-            ValueError: If the user ID is not found in the database.
+            ValueError: If the username is not found in the database.
             sqlite3.Error: If there is an error with the database connection or query.
         """
-        user = cls.query.filter_by(id=user_id).first()
+        user = cls.query.filter_by(username=username).first()
         if not user:
-            logger.info("User %s not found", user_id)
-            raise ValueError(f"User {user_id} not found")
+            logger.info("Username %s not found", username)
+            raise ValueError(f"Username {username} not found")
         user.location_name = city_name
         user.latitude = lat
         user.longitude = lon
         db.session.commit()
-        logger.info("Favorite city set for user %s: %s", user_id, city_name)
+        logger.info("Favorite city set for user %s: %s", username, city_name)
 
     @classmethod
-    def get_favorite(cls, user_id:int) -> Any: 
+    def get_favorite(cls, username:str) -> Any: 
         """
         Gets the favorite city for a user.
 
         Args:
-            user_id (int): The ID of the user.
+            username (str): The ID of the user.
 
         Returns:
             Any: A tuple containing the city name, latitude, and longitude.
+
+        Raises:
+            ValueError: If the username is not found in the database.
+            sqlite3.Error: If there is an error with the database connection or query.
         """
-        user = cls.query.filter_by(id=user_id).first()
+        user = cls.query.filter_by(username=username).first()
         if not user:
-            logger.info("User %s not found", user_id)
-            raise ValueError(f"User {user_id} not found")
+            logger.info("Username %s not found", username)
+            raise ValueError(f"Username {username} not found")
         return user.location_name, user.latitude, user.longitude
     

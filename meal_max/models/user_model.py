@@ -1,28 +1,29 @@
 import hashlib
 import logging
 import os
-import sqlite3
-from dataclasses import dataclass
-from typing import Any
 
-from meal_max.utils.sql_utils import get_db_connection
+from typing import Any
+from sqlalchemy.exc import IntegrityError
+from meal_max.db import db
+
 from meal_max.utils.logger import configure_logger
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
 
-@dataclass
-class User:
-    id: int
-    username: str
-    salt: str
-    password: str
-    location_name: str
-    latitude: float
-    longitude: float
+class User(db.Model):
+    __tablename__ = 'users'
 
-    @staticmethod
-    def generate_salted_hash(password: str) -> tuple[str, str]:
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    salt = db.Column(db.String(32), nullable=False)  # 16-byte salt in hex
+    password = db.Column(db.String(64), nullable=False)  # SHA-256 hash in hex
+    location_name = db.Column(db.String(80), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+
+    @classmethod
+    def _generate_salted_hash(cls, password: str) -> tuple[str, str]:
         """
         Generates a salted hash for the given password.
 
@@ -36,8 +37,8 @@ class User:
         hashed_password = hashlib.sha256((password + salt).encode()).hexdigest()
         return salt, hashed_password
 
-    @staticmethod
-    def verify_password(stored_password: str, salt: str, password: str) -> bool:
+    @classmethod
+    def verify_password(cls, stored_password: str, salt: str, password: str) -> bool:
         """
         Verifies a given password against the stored hash and salt.
 
@@ -51,193 +52,125 @@ class User:
         """
         hashed_password = hashlib.sha256((password + salt).encode()).hexdigest()
         return hashed_password == stored_password
+    
+    @classmethod
+    def create_account(cls, username: str, password: str) -> None:
+        """
+        Creates a new user account in the user table.
 
-def create_account(username: str, password: str) -> None:
-    """
-    Creates a new user account in the user table.
+        Args:
+            username (str): The username for the new account.
+            password (str): The password for the new account.
 
-    Args:
-        username (str): The username for the new account.
-        password (str): The password for the new account.
+        Raises:
+            ValueError: If the password is less than 8 characters long.
+            ValueError: If the username already exists in the database.
+            sqlite3.Error: If there is an error with the database connection or query.
+        """
+        if len(password) < 8:
+            logger.error("Password must be at least 8 characters long")
+            raise ValueError("Password must be at least 8 characters long")
+        salt, hashed_password = cls._generate_salted_hash(password)
+        new_user = cls(username=username, salt=salt, password=hashed_password)
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            logger.info("User successfully added to the database: %s", username)
+        except IntegrityError:
+            db.session.rollback()
+            logger.error("Duplicate username: %s", username)
+            raise ValueError(f"User with username '{username}' already exists")
+        except Exception as e:
+            db.session.rollback()
+            logger.error("Database error: %s", str(e))
+            raise e
+    
+    @classmethod
+    def update_password(cls, username: str, new_password: str) -> None:
+        """
+        Updates the password for a user account.
 
-    Raises:
-        ValueError: If the password is less than 8 characters long.
-        ValueError: If the username already exists in the database.
-        sqlite3.Error: If there is an error with the database connection or query.
-    """
-    if len(password) < 8:
-        raise ValueError("Password must be at least 8 characters long.")
+        Args:
+            username (str): The username for the account.
+            new_password (str): The new password for the account.
 
-    salt, hashed_password = User.generate_salted_hash(password)
+        Raises:
+            ValueError: If the username is not found in the database.
+            sqlite3.Error: If there is an error with the database connection or query.
+        """
+        user = cls.query.filter_by(username=username).first()
+        if not user:
+            logger.info("User %s not found", username)
+            raise ValueError(f"User {username} not found")
 
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT INTO users (username, salt, pword)
-                VALUES (?, ?, ?)
-                """,
-                (username, salt, hashed_password),
-            )
-            conn.commit()
-            logger.info("Account successfully created: %s", username)
+        salt, hashed_password = cls._generate_salted_hash(new_password)
+        user.salt = salt
+        user.password = hashed_password
+        db.session.commit()
+        logger.info("Password updated successfully for user: %s", username)
+        
+    @classmethod
+    def login(cls, username: str, password: str) -> bool:
+        """
+        Validates a user's login credentials.
 
-    except sqlite3.IntegrityError:
-        logger.error("Duplicate username: %s", username)
-        raise ValueError(f"Username '{username}' already exists")
+        Args:
+            username (str): The username for the account.
+            password (str): The password for the account.
+        
+        Returns:
+            bool: True if the login is successful, False otherwise.
 
-    except sqlite3.Error as e:
-        logger.error("Database error: %s", str(e))
-        raise e
+        Raises:
+            ValueError: If the username is not found in the database.
+            sqlite3.Error: If there is an error with the database connection or query.
+        """
+        user = cls.query.filter_by(username=username).first()
+        if not user:
+            logger.info("User %s not found", username)
+            raise ValueError(f"User {username} not found")
+        hashed_password = hashlib.sha256((password + user.salt).encode()).hexdigest()
+        return hashed_password == user.password
 
-def update_password(username: str, password: str) -> None:
-    """
-    Updates the password for a user account.
+    @classmethod
+    def set_favorite(cls, city_name:str, lat:float, lon:float, user_id:int) -> None:
+        """
+        Sets a favorite city for a user.
 
-    Args:
-        username (str): The username for the account.
-        password (str): The new password for the account.
+        Args:
+            city_name (str): The name of the city.
+            lat (float): The latitude of the city.
+            lon (float): The longitude of the city.
+            user_id (int): The ID of the user.
 
-    Raises:
-        ValueError: If the password is less than 8 characters long.
-        ValueError: If the username does not exist in the database.
-        sqlite3.Error: If there is an error with the database connection or query.
-    """
-    if len(password) < 8:
-        raise ValueError("Password must be at least 8 characters long.")
+        Raises:
+            ValueError: If the user ID is not found in the database.
+            sqlite3.Error: If there is an error with the database connection or query.
+        """
+        user = cls.query.filter_by(id=user_id).first()
+        if not user:
+            logger.info("User %s not found", user_id)
+            raise ValueError(f"User {user_id} not found")
+        user.location_name = city_name
+        user.latitude = lat
+        user.longitude = lon
+        db.session.commit()
+        logger.info("Favorite city set for user %s: %s", user_id, city_name)
 
-    salt, hashed_password = User.generate_salted_hash(password)
+    @classmethod
+    def get_favorite(cls, user_id:int) -> Any: 
+        """
+        Gets the favorite city for a user.
 
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                UPDATE users
-                SET salt = ?, pword = ?
-                WHERE username = ?
-                """,
-                (salt, hashed_password, username),
-            )
-            if cursor.rowcount == 0:
-                raise ValueError(f"User '{username}' does not exist")
-            conn.commit()
-            logger.info("Password successfully updated for account: %s", username)
+        Args:
+            user_id (int): The ID of the user.
 
-    except sqlite3.Error as e:
-        logger.error("Database error: %s", str(e))
-        raise e
-
-def login(username: str, password: str) -> bool:
-    """
-    Validates a user's login credentials.
-
-    Args:
-        username (str): The username for the account.
-        password (str): The password for the account.
-
-    Returns:
-        bool: True if the credentials are valid, False otherwise.
-
-    Raises:
-        ValueError: If the username does not exist.
-        sqlite3.Error: If there is an error with the database connection or query.
-    """
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                SELECT salt, pword
-                FROM users
-                WHERE username = ?
-                """,
-                (username,),
-            )
-            row = cursor.fetchone()
-
-            if row is None:
-                logger.info("User %s not found", username)
-                raise ValueError(f"User '{username}' not found")
-
-            salt, stored_password = row
-            if User.verify_password(stored_password, salt, password):
-                logger.info("Login successful for user: %s", username)
-                return True
-            else:
-                logger.info("Invalid password for user: %s", username)
-                return False
-
-    except sqlite3.Error as e:
-        logger.error("Database error: %s", str(e))
-        raise e
-
-def set_favorite(city_name:str, lat:float, lon:float, user_id:int) -> None:
-    """
-    Sets a favorite city for a user.
-
-    Args:
-        city_name (str): The name of the city.
-        lat (float): The latitude of the city.
-        lon (float): The longitude of the city.
-        user_id (int): The ID of the user.
-
-    Raises:
-        sqlite3.Error: If there is an error with the database connection or query.
-    """
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                    UPDATE users
-                    SET latitude = ?, longitude = ?, location_name = ?
-                    WHERE id = ?
-                """,
-                (lat, lon, city_name, user_id),
-            )
-            conn.commit()
-            logger.info("Favorite city set for user %s: %s", user_id, city_name)
-
-    except sqlite3.Error as e:
-        logger.error("Database error: %s", str(e))
-        raise e
-
-def get_favorite(user_id:int) -> Any: 
-    """
-    Gets the favorite city for a user.
-
-    Args:
-        user_id (int): The ID of the user.
-
-    Returns:
-        Any: A tuple containing the city name, latitude, and longitude.
-
-    Raises:
-        sqlite3.Error: If there is an error with the database connection or query.
-    """
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                SELECT location_name, latitude, longitude
-                FROM users
-                WHERE id = ?
-                """,
-                (user_id,),
-            )
-            row = cursor.fetchone()
-
-            if row is None:
-                logger.info("Favorite city not found for user %s", user_id)
-                return None
-
-            city_name, lat, lon = row
-            logger.info("Favorite city retrieved for user %s: %s", user_id, city_name)
-            return city_name, lat, lon
-
-    except sqlite3.Error as e:
-        logger.error("Database error: %s", str(e))
-        raise e
+        Returns:
+            Any: A tuple containing the city name, latitude, and longitude.
+        """
+        user = cls.query.filter_by(id=user_id).first()
+        if not user:
+            logger.info("User %s not found", user_id)
+            raise ValueError(f"User {user_id} not found")
+        return user.location_name, user.latitude, user.longitude
+    

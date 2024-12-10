@@ -164,9 +164,13 @@ curl -X POST http://localhost:5000/api/set-favorite \
 **Path**: `/api/current-weather`  
 **Request Type**: `GET`  
 **Purpose**: Fetches current weather data for the user's favorite location.  
-**Request Format** (Query parameters):
-- `username` (str): Username
-**Response Format**:
+**Request Format** (Query parameters):\
+`username` (str): Username\
+**Request Example**:
+```bash
+curl -X GET "http://localhost:5000/api/current-weather?username=testuser"
+```
+**Response Example**:
 ```json
 {
  "current_weather": {
@@ -223,18 +227,19 @@ or:
   "error": "Error message"
 }
 ```
-**Example**:
-```bash
-curl -X GET "http://localhost:5000/api/current-weather?username=testuser"
-```
+
 
 #### **Weather Forecast**  
 **Path**: `/api/forecast`  
 **Request Type**: `GET`  
 **Purpose**: Fetches a 8-day weather forecast for the user's favorite location.  
 **Request Format** (Query parameters):
-- `username` (str): Username
-**Response Format**:
+`username` (str): Username\
+**Request Example**:
+```bash
+curl -X GET "http://localhost:5000/api/forecast?username=testuser"
+```
+**Response Example**:
 ```json
 {
   "forecast": [
@@ -568,19 +573,26 @@ curl -X GET "http://localhost:5000/api/current-weather?username=testuser"
 
 }
 ```
-**Example**:
-```bash
-curl -X GET "http://localhost:5000/api/forecast?username=testuser"
-```
+
 
 #### **Historical Weather**  
 **Path**: `/api/historical-weather`  
 **Request Type**: `GET`  
 **Purpose**: Fetches historical weather data for a specified date.  
-**Request Format** (Query parameters):
-- `username` (str): Username
-- `date` (string): Date in `YYYY-MM-DD` format
-**Response Format**:
+**Request Format** (Query parameters):\
+`username` (str): Username\
+`date` (string): Date in `YYYY-MM-DD` format\
+**Response Format**:\
+`lat` Latitude of the location, decimal (−90; 90)\
+`lon` Longitude of the location, decimal (-180; 180)\
+`timezone` Timezone name for the requested location\
+`timezone_offset` Shift in seconds from UTC\
+`data`\
+**Request Example**:
+```bash
+curl -X GET "http://localhost:5000/api/historical-weather?username=testuser&date=2023-12-01"
+```
+**Response Example**:
 ```json
 {
    "date": "2023-12-01",
@@ -619,10 +631,7 @@ curl -X GET "http://localhost:5000/api/forecast?username=testuser"
 
 }
 ```
-**Example**:
-```bash
-curl -X GET "http://localhost:5000/api/historical-weather?username=testuser&date=2023-12-01"
-```
+
 
 #### **Air Quality**  
 **Path**: `/api/air-quality`  
@@ -634,14 +643,14 @@ curl -X GET "http://localhost:5000/api/historical-weather?username=testuser&date
 `coord` Coordinates from the specified location (latitude, longitude)\
 `list`
 - `components`
-- - components.co Сoncentration of CO (Carbon monoxide), μg/m3
-- - components.no Сoncentration of NO (Nitrogen monoxide), μg/m3
-- - components.no2 Сoncentration of NO2 (Nitrogen dioxide), μg/m3
-- - components.o3 Сoncentration of O3 (Ozone), μg/m3
-- - components.so2 Сoncentration of SO2 (Sulphur dioxide), μg/m3
-- - components.pm2_5 Сoncentration of PM2.5 (Fine particles matter), μg/m3
-- - components.pm10 Сoncentration of PM10 (Coarse particulate matter), μg/m3
-- - components.nh3 Сoncentration of NH3 (Ammonia), μg/m3
+- - `components.co` Сoncentration of CO (Carbon monoxide), μg/m3
+- - `components.no` Сoncentration of NO (Nitrogen monoxide), μg/m3
+- - `components.no2` Сoncentration of NO2 (Nitrogen dioxide), μg/m3
+- - `components.o3` Сoncentration of O3 (Ozone), μg/m3
+- - `components.so2` Сoncentration of SO2 (Sulphur dioxide), μg/m3
+- - `components.pm2_5` Сoncentration of PM2.5 (Fine particles matter), μg/m3
+- - `components.pm10` Сoncentration of PM10 (Coarse particulate matter), μg/m3
+- - `components.nh3` Сoncentration of NH3 (Ammonia), μg/m3
 - `dt` Date and time, Unix, UTC
 - `main`
 - - `main.aqi` Air Quality Index. Possible values: 1, 2, 3, 4, 5. Where 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor. 

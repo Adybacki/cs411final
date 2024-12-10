@@ -152,10 +152,10 @@ test_create_account
 test_login
 test_update_password
 test_set_favorite
-#test_current_weather
-#test_forecast
+test_current_weather
+test_forecast
 test_historical_weather
-#test_air_quality
+test_air_quality
 
 echo "All smoke tests completed successfully!"
 

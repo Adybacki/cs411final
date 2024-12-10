@@ -629,8 +629,19 @@ curl -X GET "http://localhost:5000/api/historical-weather?username=testuser&date
 **Request Type**: `GET`  
 **Purpose**: Fetches air quality data for the user's favorite location.  
 **Request Format** (Query parameters):
-- `username` (str): Username
-**Response Format**:
+`username` (str): Username\
+**Response Format**:\
+`coord` Coordinates from the specified location (latitude, longitude)
+`list`
+`dt` Date and time, Unix, UTC
+`main`
+  main.aqi Air Quality Index. Possible values: 1, 2, 3, 4, 5. Where 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor. 
+
+**Request Example**:
+```bash
+curl -X GET "http://localhost:5000/api/air-quality?username=testuser"
+```
+**Response Example**:
 ```json
 {
   "air_quality": {
@@ -660,17 +671,14 @@ curl -X GET "http://localhost:5000/api/historical-weather?username=testuser&date
   "location": "New York"
 }
 ```
-**Example**:
-```bash
-curl -X GET "http://localhost:5000/api/air-quality?username=testuser"
-```
+
 
 #### **Weather Overview**  
 **Path**: `/api/weather-overview`  
 **Request Type**: `GET`  
 **Purpose**: Fetches weather overview for the user's favorite location.  
 **Request Format** (Query parameters):
-- `username` (str): Username\
+`username` (str): Username\
 **Response Format**:<br>
 `lat` Latitude of the location, decimal (−90; 90)<br>
 `lon` Longitude of the location, decimal (-180; 180)<br>

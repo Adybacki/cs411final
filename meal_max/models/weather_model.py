@@ -8,8 +8,7 @@ import os
 from datetime import datetime
 
 
-from meal_max.models.user_model import User, get_favorite
-from meal_max.utils.sql_utils import get_db_connection
+from meal_max.models.user_model import User
 from meal_max.utils.logger import configure_logger
 
 load_dotenv()
@@ -29,7 +28,7 @@ def fetch_current_weather(user_id: int):
     """
 
     #Error handling for location (What if location returned an empty array etc?)
-    location = get_favorite(user_id)
+    location = User.get_favorite(user_id)
     if not location or None in location or len(location) < 3:
         raise ValueError("Invalid location data provided.")
 
@@ -63,7 +62,7 @@ def fetch_forecast(user_id: int):
     Returns:
         dict: Weather forecast data.
     """
-    location = get_favorite(user_id)
+    location = User.get_favorite(user_id)
 
     api_key = os.getenv("OPENWEATHER_API_KEY")
     
@@ -93,7 +92,7 @@ def fetch_historical_weather(user_id: int, query_date: str):
     Returns:
         dict: Historical weather data.
     """
-    location = get_favorite(user_id)
+    location = User.get_favorite(user_id)
     
     unix_timestamp = int(datetime.strptime(query_date, "%Y-%m-%d").timestamp())
     api_key = os.getenv("OPENWEATHER_API_KEY")
@@ -124,7 +123,7 @@ def fetch_air_quality(user_id: int):
     Returns:
         dict: Air quality data.
     """
-    location = get_favorite(user_id)
+    location = User.get_favorite(user_id)
     api_key = os.getenv("OPENWEATHER_API_KEY")
     
     url = "https://api.openweathermap.org/data/2.5/air_pollution"

@@ -670,7 +670,7 @@ curl -X GET "http://localhost:5000/api/air-quality?username=testuser"
 **Request Type**: `GET`  
 **Purpose**: Fetches weather overview for the user's favorite location.  
 **Request Format** (Query parameters):
-- `username` (str): Username<br>
+- `username` (str): Username\
 **Response Format**:<br>
 `lat` Latitude of the location, decimal (−90; 90)<br>
 `lon` Longitude of the location, decimal (-180; 180)<br>

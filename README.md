@@ -672,6 +672,18 @@ curl -X GET "http://localhost:5000/api/air-quality?username=testuser"
 **Request Format** (Query parameters):
 - `username` (str): Username
 **Response Format**:
+`lat` Latitude of the location, decimal (−90; 90)
+`lon` Longitude of the location, decimal (-180; 180)
+`tz`  Timezone in the ±XX:XX format
+`date`  Date for which summary is generated in the format YYYY-MM-DD
+`units`  Units of measurement specified in the request
+`weather_overview`  AI generated weather overview for the requested date
+
+**Request Example**:
+```bash
+curl -X GET "http://localhost:5000/api/weather-overview?username=testuser"
+```
+**Response Example**:
 ```json
 {
   "location": "New York",
@@ -685,7 +697,4 @@ curl -X GET "http://localhost:5000/api/air-quality?username=testuser"
   }
 }
 ```
-**Example**:
-```bash
-curl -X GET "http://localhost:5000/api/weather-overview?username=testuser"
-```
+

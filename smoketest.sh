@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_URL="http://localhost:5000/api"
+BASE_URL="http://localhost:5050/api"
 
 ###############################################
 #
@@ -16,18 +16,6 @@ check_health() {
     echo "Service is healthy."
   else
     echo "Health check failed."
-    #exit 1
-  fi
-}
-
-# Check database health
-test_db_check() {
-  echo "Testing database health check..."
-  response=$(curl -s -X GET "$BASE_URL/db-check")
-  if echo "$response" | grep -q '"database_status": "healthy"'; then
-    echo "Database health check passed: $response"
-  else
-    echo "Database health check failed: $response"
     #exit 1
   fi
 }

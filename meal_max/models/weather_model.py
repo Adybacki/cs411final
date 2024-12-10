@@ -65,6 +65,8 @@ def fetch_forecast(username: str):
     location = User.get_favorite(username)
 
     api_key = os.getenv("OPENWEATHER_API_KEY")
+    if not api_key:
+        raise ValueError("API key is missing or invalid.")
     
     url = "https://api.openweathermap.org/data/3.0/onecall"
     params = {
@@ -95,7 +97,10 @@ def fetch_historical_weather(username: str, query_date: str):
     location = User.get_favorite(username)
     
     unix_timestamp = int(datetime.strptime(query_date, "%Y-%m-%d").timestamp())
+
     api_key = os.getenv("OPENWEATHER_API_KEY")
+    if not api_key:
+        raise ValueError("API key is missing or invalid.")
     
     url = "https://api.openweathermap.org/data/3.0/onecall/timemachine"
     params = {
@@ -125,6 +130,8 @@ def fetch_air_quality(username: int):
     """
     location = User.get_favorite(username)
     api_key = os.getenv("OPENWEATHER_API_KEY")
+    if not api_key:
+        raise ValueError("API key is missing or invalid.")
     
     url = "https://api.openweathermap.org/data/2.5/air_pollution"
     params = {

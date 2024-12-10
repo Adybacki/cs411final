@@ -81,7 +81,7 @@ def test_fetch_historical_weather(mocker):
     assert result["location"] == "San Francisco"
     assert result["date"] == query_date
     assert "historical_weather" in result
-    assert result["historical_weather"]["temp"] == 15
+    assert result["historical_weather"]["current"]["temp"] == 15
     mock_get_favorite.assert_called_once_with(username)
     mock_requests_get.assert_called_once()
 

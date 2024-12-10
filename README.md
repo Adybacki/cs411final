@@ -24,39 +24,7 @@ The application is a Flask-based RESTful API designed to provide user account ma
 curl -X GET http://localhost:5000/api/health
 ```
 Response:
-```json
-{
-  "status": "healthy"
-}
-```
-
-#### **Database Check**  
-**Path**: `/api/db-check`  
-**Request Type**: `GET`  
-**Purpose**: Ensures the database connection is established and the `meals` table exists.  
-**Request Format**: None  
-**Response Format**:
-```json
-{
-  "database_status": "healthy"
-}
-```
-or:
-```json
-{
-  "error": "Error message"
-}
-```
-**Example**:
-```bash
-curl -X GET http://localhost:5000/api/db-check
-```
-Response:
-```json
-{
-  "database_status": "healthy"
-}
-```
+Service is healthy.
 
 ---
 
@@ -153,6 +121,41 @@ curl -X POST http://localhost:5000/api/login \
 -H "Content-Type: application/json" \
 -d '{"username":"testuser", "password":"password123"}'
 ```
+---
+
+#### **Set Favorite**  
+**Path**: `/api/set-favorite`  
+**Request Type**: `POST`  
+**Purpose**: Sets the user's favorite city along with its latitude and longitude coordinates.  
+**Request Format** (JSON body):
+```json
+{
+  "username": "testuser",
+  "city_name": "New York",
+  "longitude": 40.7128,
+  "latitude": -74.0060
+}
+```
+**Response Format**:
+```json
+{
+  "city_name": "New York",
+  "status": "favorite location set",
+  "username": "testuser"
+}
+```
+or:
+```json
+{
+  "error": "failed to set favorite location"
+}
+```
+**Example**:
+```bash
+curl -X POST http://localhost:5000/api/set-favorite \
+-H "Content-Type: application/json" \
+-d '{"username":"testuser", "city_name": "New York", "longitude": 40.7128, "latitude": -74.0060}'
+```
 
 ---
 
@@ -162,12 +165,56 @@ curl -X POST http://localhost:5000/api/login \
 **Request Type**: `GET`  
 **Purpose**: Fetches current weather data for the user's favorite location.  
 **Request Format** (Query parameters):
-- `user_id` (int): User ID
+- `username` (str): Username
 **Response Format**:
 ```json
 {
-  "temperature": 72,
-  "condition": "Sunny"
+ "current_weather": {
+    "base": "stations",
+    "clouds": {
+      "all": 100
+    },
+    "cod": 200,
+    "coord": {
+      "lat": 40.7145,
+      "lon": -74.0114
+    },
+    "dt": 1733804545,
+    "id": 5128581,
+    "main": {
+      "feels_like": 7.32,
+      "grnd_level": 1014,
+      "humidity": 91,
+      "pressure": 1015,
+      "sea_level": 1015,
+      "temp": 8.77,
+      "temp_max": 9.54,
+      "temp_min": 7.11
+    },
+    "name": "New York",
+    "sys": {
+      "country": "US",
+      "id": 2008776,
+      "sunrise": 1733746131,
+      "sunset": 1733779721,
+      "type": 2
+    },
+    "timezone": -18000,
+    "visibility": 9656,
+    "weather": [
+      {
+        "description": "mist",
+        "icon": "50n",
+        "id": 701,
+        "main": "Mist"
+      }
+    ],
+    "wind": {
+      "deg": 50,
+      "speed": 2.57
+    }
+  },
+  "location": "New York"
 }
 ```
 or:
@@ -178,7 +225,7 @@ or:
 ```
 **Example**:
 ```bash
-curl -X GET "http://localhost:5000/api/current-weather?user_id=1"
+curl -X GET "http://localhost:5000/api/current-weather?username=testuser"
 ```
 
 #### **Weather Forecast**  
@@ -186,7 +233,7 @@ curl -X GET "http://localhost:5000/api/current-weather?user_id=1"
 **Request Type**: `GET`  
 **Purpose**: Fetches a 7-day weather forecast for the user's favorite location.  
 **Request Format** (Query parameters):
-- `user_id` (int): User ID
+- `username` (str): Username
 **Response Format**:
 ```json
 {
@@ -206,7 +253,7 @@ curl -X GET "http://localhost:5000/api/forecast?user_id=1"
 **Request Type**: `GET`  
 **Purpose**: Fetches historical weather data for a specified date.  
 **Request Format** (Query parameters):
-- `user_id` (int): User ID
+- `username` (str): Username
 - `date` (string): Date in `YYYY-MM-DD` format
 **Response Format**:
 ```json
@@ -228,33 +275,38 @@ curl -X GET "http://localhost:5000/api/historical-weather?user_id=1&date=2023-12
 **Request Type**: `GET`  
 **Purpose**: Fetches air quality data for the user's favorite location.  
 **Request Format** (Query parameters):
-- `user_id` (int): User ID
+- `username` (str): Username
 **Response Format**:
 ```json
 {
   "air_quality": {
-    "pm2_5": 12,
-    "pm10": 20,
-    "o3": 15
-  }
+    "coord": {
+      "lat": 40.7128,
+      "lon": -74.006
+    },
+    "list": [
+      {
+        "components": {
+          "co": 500.68,
+          "nh3": 0.65,
+          "no": 7.94,
+          "no2": 50.72,
+          "o3": 1.33,
+          "pm10": 23.07,
+          "pm2_5": 18.66,
+          "so2": 2.41
+        },
+        "dt": 1733804469,
+        "main": {
+          "aqi": 2
+        }
+      }
+    ]
+  },
+  "location": "New York"
 }
 ```
 **Example**:
 ```bash
-curl -X GET "http://localhost:5000/api/air-quality?user_id=1"
+curl -X GET "http://localhost:5000/api/air-quality?username=testuser"
 ```
-
----
-
-## Getting Started
-1. Clone the repository and navigate to the project directory.
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Start the server:
-   ```bash
-   python app.py
-   ```
-4. Access the API at `http://localhost:5000/api`.
-

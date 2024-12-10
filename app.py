@@ -45,27 +45,6 @@ def create_app(config_class=TestConfig):
         app.logger.info('Health check')
         return make_response(jsonify({'status': 'healthy'}), 200)
 
-    @app.route('/api/db-check', methods=['GET'])
-    def db_check() -> Response:
-        """
-        Route to check if the database connection and meals table are functional.
-
-        Returns:
-            JSON response indicating the database health status.
-        Raises:
-            404 error if there is an issue with the database.
-        """
-        app.logger.info('Database check')
-        try:
-            # Check the database connection
-            db.session.execute("SELECT 1")
-            app.logger.info('Database connection successful')
-
-            return make_response(jsonify({'status': 'database healthy'}), 200)
-        except Exception as e:
-            app.logger.error('Database connection failed: %s', str(e))
-            return make_response(jsonify({'error': 'database connection failed'}), 404)
-
 
     ##########################################################
     #
